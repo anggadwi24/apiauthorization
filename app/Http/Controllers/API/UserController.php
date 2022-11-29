@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Models\User;
+use App\Helpers\LogActivity;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Validator;
+
+class UserController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware(['auth','verified']);
+    }
+    public function index(Request $request){
+        $per_page = $request->get('per_page');
+        $user = User::reorder('id','desc')->paginate($per_page);
+        $collection = UserResource::collection($user);
+        LogActivity::addToLog('LIST USERS');
+        return response()->json([
+            'message'=>'success',
+            'record'=>$collection,
+        ],200);
+    }
+
+    public function detail($email){
+        $user = User::where('email',$email)->first();
+        if($user){
+            $collection = new UserResource($user);
+            return response()->json(['message'=>'success','user'=>$collection],200);
+        }else{
+            return response()->json(['message'=>'User not found'],404);
+        }
+    }
+
+    public function edit($email){
+        $user = User::where('email',$email)->first();
+        if($user){
+            $collection = new UserResource($user);
+            return response()->json(['message'=>'success','user'=>$collection],200);
+        }else{
+            return response()->json(['message'=>'User not found'],404);
+        }
+    }
+    public function update(Request $request,$email){
+        $user = User::where('email',$email)->first();
+        if($user){  
+            $validator = Validator::make($request->all(), [
+       
+           
+                'name'=> 'required|max:255|min:3',
+                'email'=> 'required|max:255|min:10|unique:users,email,'.$user->id.',id|email',
+                'password'=>'required|min:6',
+                'level'=>'required|in:admin,user',
+               
+            ],[
+                'name.required'=>'Resource is required',
+                'name.max'=>'Resource maximal 255 character',
+                'name.min'=>'Resource minimal 3 character',
+                'email.required'=>'Email is required',
+                'email.email'=>'Email not valid',
+                'email.unique'=>'Email has been used',
+                'level.required'=>'Level is required',
+                'level.in'=>'Level not match',
+                'password.required'=>'Password is required',
+                'password.min'=>'Password min 6 character',
+              
+                
+            ]);
+            if($validator->fails()){
+                $message = $validator->errors()->all();
+                $msg = [];
+                foreach($message as $mess => $arr){
+                    $msg[] = [$message[$mess]];
+                }
+                return response()->json(['message'=>$msg],422);
+            }else{
+               
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->password = bcrypt($request->password);
+                $user->level = $request->level;
+              
+                $user->update();
+                return response()->json(['message'=>'success','user'=>new UserResource($user)],200);
+            }
+        }else{
+            return response()->json(['message','User not found'],404);
+        }
+    }
+    public function destory(Request $request,$email){
+        $user = User::where('email',$email)->first();
+        if($user){
+            $user->delete();
+            return response()->json(['message'=>'success'],200);
+        }else{
+            return response()->json(['message'=>'User not found'],404);
+        }
+    }
+    public function store(Request $request){
+        $validator = Validator::make($request->all(), [
+       
+           
+            'name'=> 'required|max:255|min:3',
+            'email'=>'required|unique:users,email|email',
+            'password'=>'required|min:6',
+            'level'=>'required|in:admin,user',
+           
+        ],[
+            'name.required'=>'Resource is required',
+            'name.max'=>'Resource maximal 255 character',
+            'name.min'=>'Resource minimal 3 character',
+            'email.required'=>'Email is required',
+            'email.email'=>'Email not valid',
+            'email.unique'=>'Email has been used',
+            'level.required'=>'Level is required',
+            'level.in'=>'Level not match',
+            'password.required'=>'Password is required',
+            'password.min'=>'Password min 6 character',
+          
+            
+        ]);
+        if($validator->fails()){
+            $message = $validator->errors()->all();
+            $msg = [];
+            foreach($message as $mess => $arr){
+                $msg[] = [$message[$mess]];
+            }
+            return response()->json(['message'=>$msg],422);
+        }else{
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = bcrypt($request->password);
+            $user->level = $request->level;
+            $user->company_id = null;
+            $user->save();
+            return response()->json(['message'=>'success','user'=>new UserResource($user)],200);
+        }
+    }
+}

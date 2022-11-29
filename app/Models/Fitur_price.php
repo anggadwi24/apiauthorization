@@ -38,4 +38,10 @@ class Fitur_price extends Model
     public function fitur(){
         return $this->belongsTo(Fitur::class);
     }
+    public function company(){
+        return $this->hasOne(Company::class);
+    }
+    public function payment(){
+        return $this->hasOne(Company_payment::class);
+    }
 }

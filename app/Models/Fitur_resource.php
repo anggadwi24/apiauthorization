@@ -14,7 +14,7 @@ class Fitur_resource extends Model
     protected $fillable = [
         'fitur_id',
         'resource_id',
-        'resource',
+        'value',
       
         'created_by',
         'updated_at',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Resource;
+use App\Helpers\LogActivity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,7 @@ class ResourceController extends Controller
         if(!$resource){
             return response()->json(['message'=>'Resource not found'],404);
         }else{
+           
             $validator = Validator::make($request->all(), [
        
            
@@ -62,7 +64,7 @@ class ResourceController extends Controller
            
            
                 $resource->update();
-    
+                LogActivity::addToLog('UPDATE RESOURCE');
                 return response()->json(['message'=>'success','data'=>$resource],200);
     
             }
@@ -98,7 +100,7 @@ class ResourceController extends Controller
        
             $resource->created_by = $request->user()->id;
             $resource->save();
-
+            LogActivity::addToLog('STORE RESOURCE');
             return response()->json(['message'=>'success'],200);
 
         }
@@ -109,6 +111,7 @@ class ResourceController extends Controller
             return response()->json(['message'=>'Resource not found'],404);
         }else{
             $resource->delete();
+            LogActivity::addToLog('DELETE RESOURCE');
             return response()->json([
                 'message'=>'Resource successfully deleted',
                 

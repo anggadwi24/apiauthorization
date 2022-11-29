@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Fitur;
-use App\Models\Fitur_price;
-use App\Models\Fitur_resource;
 use App\Models\Resource;
+use App\Models\Fitur_price;
+use App\Helpers\LogActivity;
+use Illuminate\Http\Request;
+use App\Models\Fitur_resource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\FiturResource;
 use Illuminate\Support\Facades\Validator;
 
 class FiturController extends Controller
@@ -15,24 +17,25 @@ class FiturController extends Controller
     public function index(){
         $response = [];
         $fitur = Fitur::reorder('id','desc')->get();
-        foreach($fitur as $row){
-            $resource = [];
+        $collection = FiturResource::collection($fitur);
+        // foreach($fitur as $row){
+        //     $resource = [];
             
-            $res = Fitur_resource::where('fitur_id',$row->id)->get();
-            if($res->count() > 0){
-                foreach($res as $re){
-                    $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->resource];
-                }
-            }
-            $price = Fitur_price::where('fitur_id',$row->id)->orderBy('price','asc')->first();
-            if($price){
-                $response[] = ['feature'=>$row,'resource'=>$resource,'price'=>$price];
-            }
+        //     $res = Fitur_resource::where('fitur_id',$row->id)->get();
+        //     if($res->count() > 0){
+        //         foreach($res as $re){
+        //             $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->resource];
+        //         }
+        //     }
+        //     $price = Fitur_price::where('fitur_id',$row->id)->orderBy('price','asc')->first();
+        //     if($price){
+        //         $response[] = ['feature'=>$row,'resource'=>$resource,'price'=>$price];
+        //     }
 
            
-        }
+        // }
         return response()->json([
-            'data'=>$response,
+            'data'=>$collection,
             'message'=>null,
         ],200);
     }
@@ -46,7 +49,7 @@ class FiturController extends Controller
             $res = Fitur_resource::where('fitur_id',$fitur->id)->get();
             if($res->count() > 0){
                 foreach($res as $re){
-                    $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->resource];
+                    $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->resource,'capacity'=>$re->capacity];
                 }
             }
             $price = Fitur_price::where('fitur_id',$fitur->id)->orderBy('price','asc')->get();
@@ -69,7 +72,7 @@ class FiturController extends Controller
         }else{
             $cek = Fitur_resource::where(['fitur_id'=>$fitur->id,'resource_id'=>$id])->first();
             if($cek !== null){
-                return response()->json(['condition'=>true,'value'=>$cek->resource],200);
+                return response()->json(['condition'=>true,'value'=>$cek->value,'capacity'=>$cek->capacity],200);
 
             }else{
                 return response()->json(['condition'=>false],200);
@@ -84,6 +87,7 @@ class FiturController extends Controller
         }else{
             $price = Fitur_price::where(['fitur_id'=>$fitur->id,'slug'=>$price])->first();
             if($price !== null){
+               
                 return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price],200);
 
             }else{
@@ -149,6 +153,7 @@ class FiturController extends Controller
 
                  
                     $price->update();
+                    LogActivity::addToLog('UPDATE PRICE');
                     return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price],200);
                 }
 
@@ -182,6 +187,7 @@ class FiturController extends Controller
             Fitur_price::where('fitur_id',$fitur->id)->delete();
 
             $fitur->delete();
+            LogActivity::addToLog('DELETE FEATURE');
             return response()->json(['message'=>'success'],200);
         }
     }
@@ -191,7 +197,7 @@ class FiturController extends Controller
             return response()->json(['message'=>'Feature not found'],404);
         }else{
             Fitur_resource::where('id',$id)->delete();
-          
+            LogActivity::addToLog('DELETE RESOURCE');
 
            
             return response()->json(['message'=>'success'],200);
@@ -203,7 +209,7 @@ class FiturController extends Controller
             return response()->json(['message'=>'Feature not found'],404);
         }else{
             Fitur_price::where('id',$id)->delete();
-          
+            LogActivity::addToLog('DELETE PRICE');
 
            
             return response()->json(['message'=>'success'],200);
@@ -236,7 +242,7 @@ class FiturController extends Controller
                 }
                 return response()->json(['message'=>$msg],422);
             }else{
-             
+                LogActivity::addToLog('UPDATE FEATURE');
                 $fitur->name = $request->name;
                 $fitur->description = $request->description;
               
@@ -278,7 +284,7 @@ class FiturController extends Controller
             $fitur->best = 'n';
             $fitur->created_by = $request->user()->id;
             $fitur->save();
-
+            LogActivity::addToLog('STORE FEATURE');
             return response()->json([
                 'message'=>'Successfull created feature',
                 'feature'=>$fitur,
@@ -348,6 +354,7 @@ class FiturController extends Controller
 
                         }
                     }
+                    LogActivity::addToLog('STORE PRICE');
                     return response()->json(['message'=>'Successfull created price of feature','feature'=>$fitur],200);
                 }else{
                     return response()->json(['message'=>'Price not inserted'],404);
@@ -363,7 +370,7 @@ class FiturController extends Controller
             $validator = Validator::make($request->all(), [
                 'resource'=> 'required',
                 'resource.*'=> 'required|distinct',
-
+                
                 'value'=>'required',
                 'value.*'=>'required|in:y,n',
  
@@ -388,6 +395,7 @@ class FiturController extends Controller
             }else{
                 $resource = $request->resource;
                 $value = $request->value;
+                $capacity = $request->capacity;
            
 
                 if(count($resource) > 0){
@@ -398,12 +406,18 @@ class FiturController extends Controller
                                 $reso = new Fitur_resource();
                                 $reso->fitur_id = $fitur->id;
                                 $reso->resource_id = $find->id;
-                                $reso->resource = $value[$res];
+                                $reso->value = $value[$res];
+                                if(empty($capacity[$res])){
+                                    $reso->capacity = null;
+                                }else{
+                                    $reso->capcity= $capacity[$res];
+                                }
                                 $reso->created_by = $request->user()->id;
                                 $reso->save();
                           }
                         }
                     }
+                    LogActivity::addToLog('STORE RESOURCE');
                     return response()->json(['message'=>'Successfull created resource of feature','feature'=>$fitur],200);
                 }else{
                     return response()->json(['message'=>'Resource not inserted'],404);
