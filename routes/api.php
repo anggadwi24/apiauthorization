@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\EmailVerificationController;
 use App\Http\Controllers\API\FiturController;
 use App\Http\Controllers\API\ResourceController;
@@ -33,6 +34,8 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
     Route::middleware(['auth','VerifyEmail'])->group(function () {
        
         Route::get('/category',[CategoryController::class,'index']);
+        Route::get('/category/search',[CategoryController::class,'search']);
+
         Route::get('/logout',[AuthController::class,'logout']);
     
         Route::post('/resource/store',[ResourceController::class,'store']);
@@ -40,6 +43,15 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
         Route::get('/resource/edit/{slug}',[ResourceController::class,'edit']);
         Route::post('/resource/update/{slug}',[ResourceController::class,'update']);
         Route::delete('/resource/delete/{slug}',[ResourceController::class,'destroy']);
+
+
+        Route::get('/company',[CompanyController::class,'index']);
+        Route::post('/company/add',[CompanyController::class,'store']);
+        Route::get('/company/detail/{slug}',[CompanyController::class,'detail']);
+        Route::post('/company/payment/{slug}',[CompanyController::class,'payment']);
+
+
+
 
         Route::middleware('CheckLevel:admin')->group(function () {
       

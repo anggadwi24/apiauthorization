@@ -19,11 +19,12 @@ class Company extends Model
         'slug',
         'icon',
         'province_id',
-    
+        'category_id',
         'city_id',
         'kode_pos',
         'referal',
         'active',
+        'category_id',
         'expiry_on',
         'created_by',
         'updated_at',
@@ -58,6 +59,10 @@ class Company extends Model
         return $this->belongsTo(Fitur::class);
     }
     public function price(){
-        return $this->belongsTo(Fitur_price::class);
+        return $this->belongsTo(Fitur_price::class,'fitur_price_id');
+    }
+
+    public function category(){
+        return $this->belongsTo(Category::class);
     }
 }
