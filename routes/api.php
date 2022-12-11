@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $userArr = ['email'=>$user->email,'name'=>$user->name,'level'=>$user->level,'verify'=>$user->email_verified_at];
+    return $userArr;
 });
 
 

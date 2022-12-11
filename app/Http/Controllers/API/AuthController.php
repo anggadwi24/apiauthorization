@@ -6,25 +6,54 @@ use App\Models\User;
 use App\Helpers\LogActivity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     public function login(Request $request){
-        $user = User::where('email',$request->email)->first();
-        if(!$user OR !Hash::check($request->password,$user->password)){
-            return response()->json(['message'=>'Unauthorized'],401);
+        $validator = Validator::make($request->all(), [
+       
+           
+            'email'=> 'required|email',
+            'password'=>'required',
+                    
+           
+        ],[
+            'email.required'=>'Email is required',
+            'email.email'=>'Email not valid',
+            'password.required'=>'Passord is required',
+          
+          
+            
+        ]);
+        if($validator->fails()){
+            $statusCode = 422;
+            $status = 'need validations';
+            $msg = $validator->errors();
+            return response()->json(['status'=>$status,'statusCode'=>$statusCode,'msg'=>$msg]);
+
         }else{
-            // $token = $request->user()->createToken($request->token_name)->plainTextToken;
-            LogActivity::addToLog('LOGIN');
-            $token = $user->createToken('token-name')->plainTextToken;
-            return response()->json([
-                'message'=>'success',
-                'user'=>$user,
-                'token'=>$token
-            ],200);
+            $user = User::where('email',$request->email)->first();
+            if(!$user OR !Hash::check($request->password,$user->password)){
+                $statusCode = 201;
+                $msg = 'Wrong email or password';
+                $status = 'unauthorize';
+                return response()->json(['status'=>$status,'statusCode'=>$statusCode,'msg'=>$msg]);
+            }else{
+              
+                LogActivity::addToLog('LOGIN');
+                
+                $token = $user->createToken('token-name')->plainTextToken;
+               
+                $userArr = ['email'=>$user->email,'name'=>$user->name];
+                return response()->json(['status'=>'authorize','statusCode'=>200,'user'=>$userArr,'token'=>$token]);
+
+            }
         }
+       
     }
     public function logout(Request $request){
         $user = $request->user();

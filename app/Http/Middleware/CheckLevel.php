@@ -20,10 +20,10 @@ class CheckLevel
         if(in_array($request->user()->level,$level)){
             return $next($request);
         }else{
-            return response()->json(['message'=>'You cant access this page'],411);
+            return response()->json(['message'=>'You cant access this page','statusCode'=>411,'status'=>'need request']);
             
         }
-        return response()->json(['message'=>'You are not authorized to access this page.'],411);
+        return response()->json(['message'=>'You cant access this page','statusCode'=>411,'status'=>'need request']);
       
     }
 }

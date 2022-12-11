@@ -23,16 +23,18 @@ class UserController extends Controller
         return response()->json([
             'message'=>'success',
             'record'=>$collection,
-        ],200);
+            'status'=>'success',
+            'statusCode'=>200,
+        ]);
     }
 
     public function detail($email){
         $user = User::where('email',$email)->first();
         if($user){
             $collection = new UserResource($user);
-            return response()->json(['message'=>'success','user'=>$collection],200);
+            return response()->json(['message'=>'success','user'=>$collection,'status'=>'ok','statusCode'=>200]);
         }else{
-            return response()->json(['message'=>'User not found'],404);
+            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
         }
     }
 
@@ -40,9 +42,9 @@ class UserController extends Controller
         $user = User::where('email',$email)->first();
         if($user){
             $collection = new UserResource($user);
-            return response()->json(['message'=>'success','user'=>$collection],200);
+            return response()->json(['message'=>'success','user'=>$collection,'status'=>'ok','statusCode'=>200]);
         }else{
-            return response()->json(['message'=>'User not found'],404);
+            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
         }
     }
     public function update(Request $request,$email){
@@ -76,7 +78,7 @@ class UserController extends Controller
                 foreach($message as $mess => $arr){
                     $msg[] = [$message[$mess]];
                 }
-                return response()->json(['message'=>$msg],422);
+                return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
             }else{
                
                 $user->name = $request->name;
@@ -85,19 +87,20 @@ class UserController extends Controller
                 $user->level = $request->level;
               
                 $user->update();
-                return response()->json(['message'=>'success','user'=>new UserResource($user)],200);
+                return response()->json(['message'=>'Success created users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
             }
         }else{
-            return response()->json(['message','User not found'],404);
+            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
+
         }
     }
     public function destory(Request $request,$email){
         $user = User::where('email',$email)->first();
         if($user){
             $user->delete();
-            return response()->json(['message'=>'success'],200);
+            return response()->json(['message'=>'success','status'=>'ok','statusCode'=>200]);
         }else{
-            return response()->json(['message'=>'User not found'],404);
+            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
         }
     }
     public function store(Request $request){
@@ -110,9 +113,9 @@ class UserController extends Controller
             'level'=>'required|in:admin,user',
            
         ],[
-            'name.required'=>'Resource is required',
-            'name.max'=>'Resource maximal 255 character',
-            'name.min'=>'Resource minimal 3 character',
+            'name.required'=>'Name is required',
+            'name.max'=>'Name maximal 255 character',
+            'name.min'=>'Name minimal 3 character',
             'email.required'=>'Email is required',
             'email.email'=>'Email not valid',
             'email.unique'=>'Email has been used',
@@ -124,12 +127,9 @@ class UserController extends Controller
             
         ]);
         if($validator->fails()){
-            $message = $validator->errors()->all();
-            $msg = [];
-            foreach($message as $mess => $arr){
-                $msg[] = [$message[$mess]];
-            }
-            return response()->json(['message'=>$msg],422);
+            $message = $validator->errors();
+          
+            return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
         }else{
             $user = new User();
             $user->name = $request->name;
@@ -138,7 +138,7 @@ class UserController extends Controller
             $user->level = $request->level;
             $user->company_id = null;
             $user->save();
-            return response()->json(['message'=>'success','user'=>new UserResource($user)],200);
+            return response()->json(['message'=>'Success created users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
         }
     }
 }
