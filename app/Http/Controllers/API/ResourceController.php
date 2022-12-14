@@ -17,7 +17,9 @@ class ResourceController extends Controller
         return response()->json([
             'message'=>'success',
             'record'=>$resource,
-        ],200);
+            'status'=>'ok',
+            'statusCode'=>200,
+        ]);
     }
     public function edit($slug){
         $resource = Resource::where('slug',$slug)->first();
@@ -87,12 +89,9 @@ class ResourceController extends Controller
             
         ]);
         if($validator->fails()){
-            $message = $validator->errors()->all();
-            $msg = [];
-            foreach($message as $mess => $arr){
-                $msg[] = [$message[$mess]];
-            }
-            return response()->json(['message'=>$msg],422);
+            $message = $validator->errors();
+           
+            return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
         }else{
             $resource = new Resource();
             $resource->name = $request->name;
@@ -101,7 +100,8 @@ class ResourceController extends Controller
             $resource->created_by = $request->user()->id;
             $resource->save();
             LogActivity::addToLog('STORE RESOURCE');
-            return response()->json(['message'=>'success'],200);
+            
+            return response()->json(['message'=>'success','status'=>'success','statusCode'=>200]);
 
         }
     }
