@@ -39,7 +39,7 @@ class AuthController extends Controller
             $user = User::where('email',$request->email)->first();
             if(!$user OR !Hash::check($request->password,$user->password)){
                 $statusCode = 201;
-                $msg = 'Wrong email or password';
+                $msg = ['Wrong email password'];
                 $status = 'unauthorize';
                 return response()->json(['status'=>$status,'statusCode'=>$statusCode,'msg'=>$msg]);
             }else{

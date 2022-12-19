@@ -55,7 +55,7 @@ class UserController extends Controller
            
                 'name'=> 'required|max:255|min:3',
                 'email'=> 'required|max:255|min:10|unique:users,email,'.$user->id.',id|email',
-                'password'=>'required|min:6',
+              
                 'level'=>'required|in:admin,user',
                
             ],[
@@ -67,27 +67,26 @@ class UserController extends Controller
                 'email.unique'=>'Email has been used',
                 'level.required'=>'Level is required',
                 'level.in'=>'Level not match',
-                'password.required'=>'Password is required',
-                'password.min'=>'Password min 6 character',
+              
               
                 
             ]);
             if($validator->fails()){
-                $message = $validator->errors()->all();
-                $msg = [];
-                foreach($message as $mess => $arr){
-                    $msg[] = [$message[$mess]];
-                }
+                $message = $validator->errors();
+              
                 return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
             }else{
-               
+                $password = $request->password;
                 $user->name = $request->name;
                 $user->email = $request->email;
-                $user->password = bcrypt($request->password);
+                if(!empty($password)){
+                    $user->password = bcrypt($request->password);
+
+                }
                 $user->level = $request->level;
               
                 $user->update();
-                return response()->json(['message'=>'Success created users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
+                return response()->json(['message'=>'Success updated users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
             }
         }else{
             return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);

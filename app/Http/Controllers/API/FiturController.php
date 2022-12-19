@@ -37,12 +37,14 @@ class FiturController extends Controller
         return response()->json([
             'data'=>$collection,
             'message'=>null,
-        ],200);
+            'statusCode'=>200,
+            'status'=>'OK'
+        ]);
     }
     public function detail($slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'NOTFOUND','statusCode'=>404]);
         }else{
             $resource = [];
             
@@ -53,29 +55,30 @@ class FiturController extends Controller
                 }
             }
             $price = Fitur_price::where('fitur_id',$fitur->id)->orderBy('price','asc')->get();
-            return response()->json(['message'=>'success','feature'=>$fitur,'resource'=>$resource,'price'=>$price],200);
+            return response()->json(['message'=>'success','feature'=>$fitur,'resource'=>$resource,'price'=>$price,'status'=>"OK",'statusCode'=>200]);
         }
     }
     public function edit($slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'NOTFOUND','statusCode'=>404]);
         }else{
             
-            return response()->json(['message'=>'success','feature'=>$fitur],200);
+            return response()->json(['message'=>'success','feature'=>$fitur,'status'=>'OK','statusCode'=>200 ]);
         }
     }
     public function checkResource($slug,$id){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'NOTFOUND','statusCode'=>404]);
+
         }else{
             $cek = Fitur_resource::where(['fitur_id'=>$fitur->id,'resource_id'=>$id])->first();
             if($cek !== null){
-                return response()->json(['condition'=>true,'value'=>$cek->value,'capacity'=>$cek->capacity],200);
+                return response()->json(['condition'=>true,'value'=>$cek->value,'capacity'=>$cek->capacity,'statusCode'=>200]);
 
             }else{
-                return response()->json(['condition'=>false],200);
+                return response()->json(['condition'=>false,'statusCode'=>200]);
 
             }
         }
@@ -83,15 +86,15 @@ class FiturController extends Controller
     public function editPrice($slug,$price){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'NOTFOUND','statusCode'=>404]);
         }else{
             $price = Fitur_price::where(['fitur_id'=>$fitur->id,'slug'=>$price])->first();
             if($price !== null){
                
-                return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price],200);
+                return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price,'status'=>'success','statusCode'=>200]);
 
             }else{
-                return response()->json(['message'=>'Price not found'],404);
+                return response()->json(['message'=>'Price not found','status'=>'notfound','statusCode'=>404]);
 
 
             }
