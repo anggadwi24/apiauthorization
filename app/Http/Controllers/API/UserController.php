@@ -93,15 +93,7 @@ class UserController extends Controller
 
         }
     }
-    public function destory(Request $request,$email){
-        $user = User::where('email',$email)->first();
-        if($user){
-            $user->delete();
-            return response()->json(['message'=>'success','status'=>'ok','statusCode'=>200]);
-        }else{
-            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
-        }
-    }
+    
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
        
@@ -138,6 +130,15 @@ class UserController extends Controller
             $user->company_id = null;
             $user->save();
             return response()->json(['message'=>'Success created users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
+        }
+    }
+    public function destroy($email){
+        $user = User::where('email',$email)->first();
+        if($user){
+            $user->delete();
+            return response()->json(['message'=>'success','status'=>'ok','statusCode'=>200]);
+        }else{
+            return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
         }
     }
 }

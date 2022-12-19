@@ -17,17 +17,26 @@ class ResourceController extends Controller
         return response()->json([
             'message'=>'success',
             'record'=>$resource,
-        ],200);
+            'status'=>'ok',
+            'statusCode'=>200,
+        ]);
     }
     public function edit($slug){
         $resource = Resource::where('slug',$slug)->first();
         if(!$resource){
-            return response()->json(['message'=>'Resource not found'],404);
+            return response()->json([
+                'message'=>'Resource not found',
+                'status'=>'NOTFOUND',
+                'statusCode'=>404,
+             
+            ]);
         }else{
             return response()->json([
                 'message'=>'success',
+                'status'=>'OK',
+                'statusCode'=>200,
                 'data'=>$resource,
-            ],200);
+            ]);
         }
     }
     public function update(Request $request,$slug){
@@ -51,12 +60,8 @@ class ResourceController extends Controller
                 
             ]);
             if($validator->fails()){
-                $message = $validator->errors()->all();
-                $msg = [];
-                foreach($message as $mess => $arr){
-                    $msg[] = [$message[$mess]];
-                }
-                return response()->json(['message'=>$msg],422);
+                $message = $validator->errors();
+                return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
             }else{
                
                 $resource->name = $request->name;
@@ -65,7 +70,7 @@ class ResourceController extends Controller
            
                 $resource->update();
                 LogActivity::addToLog('UPDATE RESOURCE');
-                return response()->json(['message'=>'success','data'=>$resource],200);
+                return response()->json(['message'=>'success','status'=>'success','statusCode'=>200]);
     
             }
             
@@ -87,12 +92,9 @@ class ResourceController extends Controller
             
         ]);
         if($validator->fails()){
-            $message = $validator->errors()->all();
-            $msg = [];
-            foreach($message as $mess => $arr){
-                $msg[] = [$message[$mess]];
-            }
-            return response()->json(['message'=>$msg],422);
+            $message = $validator->errors();
+           
+            return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
         }else{
             $resource = new Resource();
             $resource->name = $request->name;
@@ -101,21 +103,24 @@ class ResourceController extends Controller
             $resource->created_by = $request->user()->id;
             $resource->save();
             LogActivity::addToLog('STORE RESOURCE');
-            return response()->json(['message'=>'success'],200);
+            
+            return response()->json(['message'=>'success','status'=>'success','statusCode'=>200]);
 
         }
     }
     public function destroy(Request $request, $slug){
         $resource = Resource::where('slug',$slug)->first();
         if(!$resource){
-            return response()->json(['message'=>'Resource not found'],404);
+            return response()->json(['message'=>'Resource not found','status'=>'error','statusCode'=>404]);
         }else{
             $resource->delete();
             LogActivity::addToLog('DELETE RESOURCE');
             return response()->json([
                 'message'=>'Resource successfully deleted',
+                'status'=>true,
+                'statusCode'=>200,
                 
-            ],200);
+            ]);
         }
     }
 }
