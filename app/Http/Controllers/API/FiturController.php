@@ -104,10 +104,10 @@ class FiturController extends Controller
     public function updatePrice(Request $request,$slug,$price){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'not_found','statusCode'=>404]);
         }else{
             $price = Fitur_price::where(['fitur_id'=>$fitur->id,'slug'=>$price])->first();
-            if($price === null){
+            if($price){
                 $validator = Validator::make($request->all(), [
                     'name'=> 'required|max:255|min:3',
                   
@@ -137,12 +137,9 @@ class FiturController extends Controller
                 
                 ]);
                 if($validator->fails()){
-                    $message = $validator->errors()->all();
-                    $msg = [];
-                    foreach($message as $mess => $arr){
-                        $msg[] = [$message[$mess]];
-                    }
-                    return response()->json(['message'=>$msg],422);
+                    $message = $validator->errors();
+                  
+                    return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validation errors']);
                 }else{
                     $name = $request->name;
                     $price = $request->price;
@@ -157,13 +154,13 @@ class FiturController extends Controller
                  
                     $price->update();
                     LogActivity::addToLog('UPDATE PRICE');
-                    return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price],200);
+                    return response()->json(['message'=>'Price successfully updated','feature'=>$fitur,'price'=>$price,'status'=>'success','statusCode'=>200]);
                 }
 
               
 
             }else{
-                return response()->json(['message'=>'success','feature'=>$fitur,'price'=>$price],200);
+                return response()->json(['message'=>'Price not found','status'=>'not found','statusCode'=>404]);
 
             }
         }
@@ -173,55 +170,58 @@ class FiturController extends Controller
     public function best($slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','statusCode'=>404,'status'=>'not found']);
         }else{
             Fitur::where('best','y')->update(['best'=>'n']);
             $fitur->best = 'y';
             $fitur->update();
-            return response()->json(['message'=>'success'],200);
+            return response()->json(['message'=>'Successfully update best feature','statusCode'=>200,'status'=>'success']);
         }
     }
     public function destroy($slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'not found','statusCode'=>404]);
         }else{
             Fitur_resource::where('fitur_id',$fitur->id)->delete();
             Fitur_price::where('fitur_id',$fitur->id)->delete();
 
             $fitur->delete();
             LogActivity::addToLog('DELETE FEATURE');
-            return response()->json(['message'=>'success'],200);
+            return response()->json(['message'=>'Feature successfully deleted','status'=>'success','statusCode'=>200]);
         }
     }
     public function destroyResource($slug,$id){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'not found','statusCode'=>404]);
         }else{
             Fitur_resource::where('id',$id)->delete();
             LogActivity::addToLog('DELETE RESOURCE');
 
            
-            return response()->json(['message'=>'success'],200);
+            return response()->json(['message'=>'Feature resource successfully deleted','status'=>'success','statusCode'=>200]);
+
         }
     }
     public function destroyPrice($slug,$id){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'not found','statusCode'=>404]);
         }else{
             Fitur_price::where('id',$id)->delete();
             LogActivity::addToLog('DELETE PRICE');
 
            
-            return response()->json(['message'=>'success'],200);
+            return response()->json(['message'=>'Feature price successfully deleted','status'=>'success','statusCode'=>200]);
+
         }
     }
     public function update(Request $request,$slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'not found','statusCode'=>404]);
+
         }else{
             $validator = Validator::make($request->all(), [
        
@@ -238,12 +238,9 @@ class FiturController extends Controller
                 
             ]);
             if($validator->fails()){
-                $message = $validator->errors()->all();
-                $msg = [];
-                foreach($message as $mess => $arr){
-                    $msg[] = [$message[$mess]];
-                }
-                return response()->json(['message'=>$msg],422);
+                $message = $validator->errors();
+              
+                return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validations error']);
             }else{
                 LogActivity::addToLog('UPDATE FEATURE');
                 $fitur->name = $request->name;
@@ -251,10 +248,7 @@ class FiturController extends Controller
               
                 $fitur->update();
     
-                return response()->json([
-                    'message'=>'Successfull updated feature',
-                    'feature'=>$fitur,
-                ],200);
+                return response()->json(['message'=>'Feature price successfully updated','status'=>'success','statusCode'=>200]);
             }
         }
     }
@@ -266,20 +260,18 @@ class FiturController extends Controller
             'description'=>'required',
            
         ],[
-            'name.required'=>'Resource is required',
-            'name.max'=>'Resource maksimal 255 karakter',
-            'name.min'=>'Resource minimal 3 character',
+            'name.required'=>'Feature is required',
+            'name.max'=>'Feature maksimal 255 karakter',
+            'name.min'=>'Feature minimal 3 character',
             'description.required'=>'Description is required',
           
             
         ]);
         if($validator->fails()){
-            $message = $validator->errors()->all();
-            $msg = [];
-            foreach($message as $mess => $arr){
-                $msg[] = [$message[$mess]];
-            }
-            return response()->json(['message'=>$msg],422);
+            $message = $validator->errors();
+           
+            return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validations error']);
+
         }else{
             $fitur = new Fitur();
             $fitur->name = $request->name;
@@ -290,14 +282,16 @@ class FiturController extends Controller
             LogActivity::addToLog('STORE FEATURE');
             return response()->json([
                 'message'=>'Successfull created feature',
-                'feature'=>$fitur,
-            ],200);
+                'status'=>'success',
+                'slug'=>$fitur->slug,
+                'statusCode'=>200
+            ]);
         }
     }
     public function storePrice(Request $request,$slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'success','statusCode'=>404]);
         }else{
             $validator = Validator::make($request->all(), [
                 'name'=> 'required',
@@ -330,12 +324,9 @@ class FiturController extends Controller
             
             ]);
             if($validator->fails()){
-                $message = $validator->errors()->all();
-                $msg = [];
-                foreach($message as $mess => $arr){
-                    $msg[] = [$message[$mess]];
-                }
-                return response()->json(['message'=>$msg],422);
+                $message = $validator->errors();
+                return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validations error']);
+
             }else{
                 $name = $request->name;
                 $price = $request->price;
@@ -358,9 +349,16 @@ class FiturController extends Controller
                         }
                     }
                     LogActivity::addToLog('STORE PRICE');
-                    return response()->json(['message'=>'Successfull created price of feature','feature'=>$fitur],200);
+                    return response()->json([
+                        'message'=>'Successfull inserted price',
+                        'status'=>'success',
+                        'slug'=>$fitur->slug,
+                        'statusCode'=>200
+                    ]);
                 }else{
-                    return response()->json(['message'=>'Price not inserted'],404);
+                    
+                    return response()->json(['message'=>'Price not found','status'=>'success','statusCode'=>404]);
+
                 }
             }
         }
@@ -368,7 +366,7 @@ class FiturController extends Controller
     public function storeResource(Request $request,$slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
-            return response()->json(['message'=>'Feature not found'],404);
+            return response()->json(['message'=>'Feature not found','status'=>'success','statusCode'=>404]);
         }else{
             $validator = Validator::make($request->all(), [
                 'resource'=> 'required',
@@ -389,12 +387,9 @@ class FiturController extends Controller
      
             ]);
             if($validator->fails()){
-                $message = $validator->errors()->all();
-                $msg = [];
-                foreach($message as $mess => $arr){
-                    $msg[] = [$message[$mess]];
-                }
-                return response()->json(['message'=>$msg],422);
+                $message = $validator->errors();
+                return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validations error']);
+
             }else{
                 $resource = $request->resource;
                 $value = $request->value;
@@ -421,9 +416,15 @@ class FiturController extends Controller
                         }
                     }
                     LogActivity::addToLog('STORE RESOURCE');
-                    return response()->json(['message'=>'Successfull created resource of feature','feature'=>$fitur],200);
+                    return response()->json([
+                        'message'=>'Successfull inserted resource',
+                        'status'=>'success',
+                        'statusCode'=>200
+                    ]);
                 }else{
-                    return response()->json(['message'=>'Resource not inserted'],404);
+                    
+                    return response()->json(['message'=>'Price not inserted','status'=>'success','statusCode'=>404]);
+
                 }
             }
         }
