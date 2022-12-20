@@ -310,7 +310,7 @@ class FiturController extends Controller
                 'discount.*'=>'required|numeric',
 
                 'duration'=>'required',
-                'duration.*'=>'required|in:month,year',  
+                'duration.*'=>'required|in:monthly,yearly,daily,weekly',  
             ],[
                 'name.required'=>'Name price is required',
                 'name.*.required'=>'Name price is required',
@@ -326,7 +326,7 @@ class FiturController extends Controller
 
                 'duration.required'=>'Duration is required',
                 'duration.*.required'=>'Duration is required',
-                'duration.*.in'=>'Duration can only monthly or yearly',
+                'duration.*.in'=>'Duration type not valid',
             
             ]);
             if($validator->fails()){
