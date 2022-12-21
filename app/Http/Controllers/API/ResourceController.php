@@ -21,6 +21,15 @@ class ResourceController extends Controller
             'statusCode'=>200,
         ]);
     }
+    public function get(){
+        $resource = Resource::reorder('id','desc')->get();
+        return response()->json([
+            'message'=>'success',
+            'record'=>$resource,
+            'status'=>'ok',
+            'statusCode'=>200,
+        ]);
+    }
     public function edit($slug){
         $resource = Resource::where('slug',$slug)->first();
         if(!$resource){

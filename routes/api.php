@@ -42,6 +42,8 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
     
         Route::post('/resource/store',[ResourceController::class,'store']);
         Route::get('/resource',[ResourceController::class,'index']);
+        Route::get('/resource/get',[ResourceController::class,'get']);
+
         Route::get('/resource/edit/{slug}',[ResourceController::class,'edit']);
         Route::post('/resource/update/{slug}',[ResourceController::class,'update']);
         Route::delete('/resource/delete/{slug}',[ResourceController::class,'destroy']);
