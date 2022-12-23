@@ -20,6 +20,7 @@ class FiturSourceResource extends JsonResource
             'name'=>$this->sumber->name,
             'resource_id'=>$this->resource_id,
             'capacity'=>$this->capacity,
+            'description'=>$this->sumber->description
 
            
 

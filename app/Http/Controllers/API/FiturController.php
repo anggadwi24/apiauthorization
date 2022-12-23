@@ -51,7 +51,7 @@ class FiturController extends Controller
             $res = Fitur_resource::where('fitur_id',$fitur->id)->get();
             if($res->count() > 0){
                 foreach($res as $re){
-                    $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->resource,'capacity'=>$re->capacity];
+                    $resource[] = ['resource'=>$re->sumber->name,'id'=>$re->id,'value'=>$re->value,'capacity'=>$re->capacity];
                 }
             }
             $price = Fitur_price::where('fitur_id',$fitur->id)->orderBy('price','asc')->get();
@@ -369,17 +369,13 @@ class FiturController extends Controller
             return response()->json(['message'=>'Feature not found','status'=>'success','statusCode'=>404]);
         }else{
             $validator = Validator::make($request->all(), [
-                'resource'=> 'required',
-                'resource.*'=> 'required|distinct',
+               
                 
                 'value'=>'required',
                 'value.*'=>'required|in:y,n',
  
             ],[
-                'resource.required'=>'Resource is required',
-                'resource.*.required'=>'Resource is required',
-                'resource.*.distinct'=>'Resource can`nt be same',
-
+               
                 'value.required'=>'Resource value is required',
                 'value.*.required'=>'Resource value is required',
                 'value.*.in'=>'Resource value must be yes or no',
@@ -391,29 +387,31 @@ class FiturController extends Controller
                 return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validations error']);
 
             }else{
-                $resource = $request->resource;
+               
                 $value = $request->value;
                 $capacity = $request->capacity;
-           
+                $resource = Resource::reorder('id','desc')->get();
 
-                if(count($resource) > 0){
-                    foreach($resource as $res => $val){
-                        if(!empty($resource[$res]) AND !empty($resource[$res]) ){
-                          $find = Resource::where('slug',$resource[$res])->first();
-                          if($find){
+                if($resource->count() > 0){
+                    Fitur_resource::where('fitur_id',$fitur->id)->delete();
+                    $no = 0;
+                    foreach($resource as $res){
+                      
+                         
                                 $reso = new Fitur_resource();
                                 $reso->fitur_id = $fitur->id;
-                                $reso->resource_id = $find->id;
-                                $reso->value = $value[$res];
-                                if(empty($capacity[$res])){
+                                $reso->resource_id = $res->id;
+                                $reso->value = $value[$no];
+                                if(empty($capacity[$no])){
                                     $reso->capacity = null;
                                 }else{
-                                    $reso->capcity= $capacity[$res];
+                                    $reso->capacity= $capacity[$no];
                                 }
                                 $reso->created_by = $request->user()->id;
                                 $reso->save();
-                          }
-                        }
+                        $no++;
+                          
+                        
                     }
                     LogActivity::addToLog('STORE RESOURCE');
                     return response()->json([
