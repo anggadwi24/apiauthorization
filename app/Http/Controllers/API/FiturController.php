@@ -67,20 +67,32 @@ class FiturController extends Controller
             return response()->json(['message'=>'success','feature'=>$fitur,'status'=>'OK','statusCode'=>200 ]);
         }
     }
-    public function checkResource($slug,$id){
+    public function checkResource($slug){
         $fitur = Fitur::where('slug',$slug)->first();
         if(!$fitur){
             return response()->json(['message'=>'Feature not found','status'=>'NOTFOUND','statusCode'=>404]);
 
         }else{
-            $cek = Fitur_resource::where(['fitur_id'=>$fitur->id,'resource_id'=>$id])->first();
-            if($cek !== null){
-                return response()->json(['condition'=>true,'value'=>$cek->value,'capacity'=>$cek->capacity,'statusCode'=>200]);
-
-            }else{
-                return response()->json(['condition'=>false,'statusCode'=>200]);
-
+            $resource = Resource::reorder('id','desc')->get();
+            $arr = [];
+            if($resource->count() > 0){
+                foreach($resource as $res){
+                     $cek = Fitur_resource::where(['fitur_id'=>$fitur->id,'resource_id'=>$res->id])->first();
+                     if($cek){
+                        $hash = true;
+                        $value = $cek->value;
+                        $capacity = $cek->capacity;
+                     }else{
+                        $hash = false;
+                        $value = 'n';
+                        $capacity = '';
+                     }
+                    $arr[] = ['name'=>$res->name,'slug'=>$res->slug,'description'=>$res->description,'hash'=>$hash,'capacity'=>$capacity,'value'=>$value];
+                }
+               
             }
+            return response()->json(['message'=>'success','status'=>'ok','statusCode'=>200,'record'=>$arr]);
+            
         }
     }
     public function editPrice($slug,$price){
@@ -113,7 +125,7 @@ class FiturController extends Controller
                   
     
                     'price'=>'required',
-                  
+                    'duration'=>'required|in:weekly,daily,yearly,monthly',
     
                     'discount'=>'required|numeric',
                     
@@ -127,7 +139,9 @@ class FiturController extends Controller
                     'name.min'=>'Name price minimal 3 character',
     
                     'price.required'=>'Price is required',
-                 
+                    'duratoion.required'=>'Duration is required',
+                    'duratoion.in'=>'Duration option not valid',
+
     
                     'discount.required'=>'Discount percentage is required',
                  
@@ -142,12 +156,14 @@ class FiturController extends Controller
                     return response()->json(['message'=>$message,'statusCode'=>422,'status'=>'validation errors']);
                 }else{
                     $name = $request->name;
-                    $price = $request->price;
+                    $prices = $request->price;
                     $discount = $request->discount;
-                    $newPrice = str_replace(array('.',','),'',$price);
+                    $duration = $request->duration;
+                    $newPrice = str_replace(array('.',','),'',$prices);
                   
                     $price->name = $name;
                     $price->price = $newPrice;
+                    $price->duration = $duration;
                     $price->discount_percent = $discount;
                     $price->discount = ($newPrice*$discount)/100;
 
@@ -343,6 +359,7 @@ class FiturController extends Controller
                             $fp->discount_percent = $discount[$pr];
                             $fp->discount = ($newPrice*$discount[$pr])/100;
                             $fp->fitur_id = $fitur->id;
+                            $fp->duration = $duration[$pr];
                             $fp->created_by = $request->user()->id;
                             $fp->save();
 

@@ -27,7 +27,7 @@ class CompanyController extends Controller
         }
         $company = Company::orderBy('id','desc')->paginate($per_page);
         $collection = CompanyResource::collection($company);
-        return response()->json(['message'=>'success','data'=>$collection],200);
+        return response()->json(['message'=>'success','data'=>$collection,'statusCode'=>200,'status'=>'success']);
     }
 
     public function store(Request $request){
@@ -67,12 +67,9 @@ class CompanyController extends Controller
             
         ]);
         if($validator->fails()){
-            $message = $validator->errors()->all();
-            $msg = [];
-            foreach($message as $mess => $arr){
-                $msg[] = [$message[$mess]];
-            }
-            return response()->json(['message'=>$msg],422);
+            $message = $validator->errors();
+          
+            return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
         }else{
             $fitur = $request->feature;
             $price = $request->duration;
@@ -125,12 +122,8 @@ class CompanyController extends Controller
                                     
                                     ]);
                                     if($validator->fails()){
-                                        $message = $validator->errors()->all();
-                                        $msg = [];
-                                        foreach($message as $mess => $arr){
-                                            $msg[] = [$message[$mess]];
-                                        }
-                                        return response()->json(['message'=>$msg],422);
+                                        $message = $validator->errors();
+                                        return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
                                     }else{
                                         $filenames = Str::slug($name). '.' . $file->getClientOriginalExtension();
                         
@@ -175,7 +168,7 @@ class CompanyController extends Controller
                                             LogActivity::addToLog('ADD COMPANY');
     
                                         }
-                                        return response()->json(['message'=>'success','slug'=>$comp->slug],200);
+                                        return response()->json(['message'=>'Success created data company','slug'=>$comp->slug,'status'=>'success','statusCode'=>200]);
                                     }
                                 }else{
                                     $comp = new Company();
@@ -214,13 +207,14 @@ class CompanyController extends Controller
                                         LogActivity::addToLog('ADD COMPANY');
 
                                     }
-                                    return response()->json(['message'=>'success','slug'=>$comp->slug],200);
+                                    return response()->json(['message'=>'Success created data company','slug'=>$comp->slug,'status'=>'success','statusCode'=>200]);
+
 
                                 }
                                 
                                
                             }else{
-                                return response()->json(['message'=>'Referal code not found'],404);
+                                return response()->json(['message'=>'Referal code not found','statusCode'=>404,'status'=>'error']);
                             }
                         }else{
                             $file = $request->file('icon');
@@ -239,11 +233,8 @@ class CompanyController extends Controller
                                 ]);
                                 if($validator->fails()){
                                     $message = $validator->errors()->all();
-                                    $msg = [];
-                                    foreach($message as $mess => $arr){
-                                        $msg[] = [$message[$mess]];
-                                    }
-                                    return response()->json(['message'=>$msg],422);
+                                   
+                                    return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
                                 }else{
                                     $filenames = Str::slug($name). '.' . $file->getClientOriginalExtension();
                      
@@ -325,22 +316,29 @@ class CompanyController extends Controller
                                     
                                     $pay->save();
                                 }
-                                return response()->json(['message'=>'success','slug'=>$comp->slug],200);
+                                return response()->json(['message'=>'Success created data company','slug'=>$comp->slug,'status'=>'success','statusCode'=>200]);
+
                             }
                             
                         }
                         
 
                     }else{
-                        return response()->json(['message'=>'City or province not found'],404);
+                        
+                        return response()->json(['message'=>'City or province not found','statusCode'=>404,'status'=>'error']);
+
                     }
                    
                     
                 }else{
-                    return response()->json(['message'=>'Feature duration not found'],404);
+                    return response()->json(['message'=>'Feature duration not found','statusCode'=>404,'status'=>'error']);
+
+                   
                 }
             }else{
-                return response()->json(['message'=>'Feature not found'],404);
+                return response()->json(['message'=>'Feature not found','statusCode'=>404,'status'=>'error']);
+
+              
             }
         }
     }
@@ -348,9 +346,9 @@ class CompanyController extends Controller
         $row = Company::where('slug',$slug)->first();
         if($row){
             $collection = CompanyResource::make($row);
-            return response()->json(['message'=>'success','data'=>$collection],200);
+            return response()->json(['message'=>'success','data'=>$collection,'status'=>'success','statusCode'=>200]);
         }else{
-            return response()->json(['message'=>'Company not found'],404);
+            return response()->json(['message'=>'Company not found','status'=>'notfound','statusCode'=>404]);
         }
     }
     public function payment($slug){
@@ -392,15 +390,15 @@ class CompanyController extends Controller
                     }
               }
               LogActivity::addToLog('PAYMENT COMPANY');
-              return response()->json(['message'=>'Payment successfully'],200);
+              return response()->json(['message'=>'Payment successfully','status'=>'success','statusCode'=>200]);
             }else{
-                return response()->json(['message'=>'This company not have payment'],404);
+                return response()->json(['message'=>'This company not have payment','status'=>'error','statusCode'=>201]);
             }
            
            
 
         }else{
-            return response()->json(['message'=>'Company not found'],404);
+            return response()->json(['message'=>'Company not found','statusCode'=>404,'status'=>'notfound']);
         }
       
     }

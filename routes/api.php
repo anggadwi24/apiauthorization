@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AjaxController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\CompanyController;
@@ -37,6 +38,9 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
        
         Route::get('/category',[CategoryController::class,'index']);
         Route::get('/category/search',[CategoryController::class,'search']);
+        Route::get('/province',[AjaxController::class,'getProvince']);
+        Route::get('/city/{province}',[AjaxController::class,'getCity']);
+
 
         Route::get('/logout',[AuthController::class,'logout']);
     
