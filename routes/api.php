@@ -68,7 +68,7 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
             Route::get('/feature/best/{slug}',[FiturController::class,'best']);
             Route::get('/feature/detail/{slug}',[FiturController::class,'detail']);
             Route::get('/feature/edit/{slug}',[FiturController::class,'edit']);
-            Route::get('/feature/checkresource/{slug}/{id}',[FiturController::class,'checkResource']);
+            Route::get('/feature/resource/detail/{slug}',[FiturController::class,'checkResource']);
             Route::get('/feature/edit/price/{slug}/{price}',[FiturController::class,'editPrice']);
             Route::post('/feature/edit/price/{slug}/{price}',[FiturController::class,'updatePrice']);
             Route::post('/feature/edit/{slug}',[FiturController::class,'update']);

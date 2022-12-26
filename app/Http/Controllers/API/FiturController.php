@@ -87,9 +87,9 @@ class FiturController extends Controller
                         $value = 'n';
                         $capacity = '';
                      }
-                    $arr[] = ['name'=>$res->name,'slug'=>$res->slug,'description'=>$res->description,'hash'=>$hash,'capacity'=>$capacity,'value'=>$value];
+                $arr[] = ['name'=>$res->name,'slug'=>$res->slug,'description'=>$res->description,'hash'=>$hash,'capacity'=>$capacity,'value'=>$value];
+
                 }
-               
             }
             return response()->json(['message'=>'success','status'=>'ok','statusCode'=>200,'record'=>$arr]);
             

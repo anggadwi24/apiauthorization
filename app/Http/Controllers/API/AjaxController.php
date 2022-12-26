@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProvinceResource;
 use App\Models\City;
 use App\Models\Province;
 use Illuminate\Http\Request;
@@ -11,7 +12,10 @@ class AjaxController extends Controller
 {
     public function getProvince(){
         $data = Province::reorder('name','asc')->get();
-        return response()->json(['message'=>'success','data'=>$data,'status'=>'ok','statusCode'=>200]);
+        $collection = ProvinceResource::collection($data);
+       
+
+        return response()->json(['message'=>'success','data'=>$collection,'status'=>'ok','statusCode'=>200]);
     }
 
     public function getCity($province){
