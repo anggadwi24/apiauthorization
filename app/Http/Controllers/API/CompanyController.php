@@ -20,13 +20,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
 {
-    public function index(Request $request){
-        $per_page = $request->get('per_page');
-        if(empty($per_page)){
-            $per_page = 10;
-        }
-        $company = Company::orderBy('id','desc')->paginate($per_page);
-        $collection = CompanyResource::collection($company);
+    public function index(){
+      $company = Company::orderBy('id','desc')->paginate(6);
+        $collection = CompanyResource::collection($company)->response()->getData(true);
         return response()->json(['message'=>'success','data'=>$collection,'statusCode'=>200,'status'=>'success']);
     }
 
