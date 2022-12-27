@@ -9,9 +9,12 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     public function index(){
-        return response()->json([
-            'message'=>'Halaman kategori',
-        ],200);
+        $category = Category::select('name')->orderBy('name','asc')->get();
+        $name = [];
+        foreach($category as $ca) {
+            $name[] = $ca->name;
+        }   
+        return response()->json(['record'=>$name,'statusCode'=>200,'status'=>'OK']);
     }
 
     public function search(Request $request){
