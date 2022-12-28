@@ -13,7 +13,7 @@ use App\Helpers\LogActivity;
 use Illuminate\Http\Request;
 use App\Models\Company_payment;
 use App\Http\Controllers\Controller;
-use Intervention\Image\Facades\Image;
+use Image;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company_referal;
 use Illuminate\Support\Facades\Validator;
@@ -123,7 +123,7 @@ class CompanyController extends Controller
                                     }else{
                                         $filenames = Str::slug($name). '.' . $file->getClientOriginalExtension();
                         
-                                        $image =  Image::make($file);
+                                        $image =  Image::make($file->getRealPath());
                                         $image->resize(500, null, function ($constraint) {
                                         $constraint->aspectRatio();
                                         });  
@@ -234,7 +234,7 @@ class CompanyController extends Controller
                                 }else{
                                     $filenames = Str::slug($name). '.' . $file->getClientOriginalExtension();
                      
-                                    $image =  Image::make($file);
+                                    $image =  Image::make($file->getRealPath());
                                     $image->resize(500, null, function ($constraint) {
                                     $constraint->aspectRatio();
                                     });             
