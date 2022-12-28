@@ -39,6 +39,8 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
         Route::get('/category',[CategoryController::class,'index']);
         Route::get('/category/search',[CategoryController::class,'search']);
         Route::get('/province',[AjaxController::class,'getProvince']);
+        Route::get('/featureall',[AjaxController::class,'getFeature']);
+        
         Route::get('/city/{province}',[AjaxController::class,'getCity']);
 
 
