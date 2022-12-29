@@ -274,8 +274,7 @@ class CompanyController extends Controller
                                         $pay->save();
                                         LogActivity::addToLog('ADD COMPANY');
                                     }
-                                    return response()->json(['message'=>'success','slug'=>$comp->slug],200);
-    
+                                    return response()->json(['message'=>'Success created data company','slug'=>$comp->slug,'status'=>'success','statusCode'=>200]);
                                 }
                             }else{
                                 $comp = new Company();
