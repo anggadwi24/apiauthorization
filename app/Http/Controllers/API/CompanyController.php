@@ -89,6 +89,7 @@ class CompanyController extends Controller
                     }else{
                         $amount = $fPrice->price;
                     }
+                    
                     $city_sel = City::where('province_id',$province)->where('id',$city)->first();
                     if($city_sel){
                         $cat = Category::where('name',$category)->first();
@@ -143,6 +144,16 @@ class CompanyController extends Controller
                                         $comp->kode_pos = $kode_pos;
                                         $comp->active = 'pending';
                                         $comp->referal = $referal;
+                                        $duration = $fPrice->duration;
+                                        if($duration == 'week'){
+                                            $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                        }else if($duration == 'monthly'){
+                                            $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                        }else if($duration == 'daily'){
+                                            $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+1 Days'));
+                                        }else if($duration == 'yearly'){
+                                            $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+365 Days'));
+                                        }
                                     
                                         $comp->save();
     
@@ -255,6 +266,16 @@ class CompanyController extends Controller
                                     $comp->active = 'pending';
                                   
                                     $comp->referal = null;
+                                    $duration = $fPrice->duration;
+                                    if($duration == 'week'){
+                                        $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                    }else if($duration == 'monthly'){
+                                        $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                    }else if($duration == 'daily'){
+                                        $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+1 Days'));
+                                    }else if($duration == 'yearly'){
+                                        $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+365 Days'));
+                                    }
                                     $comp->save();
         
                                     if($comp){
@@ -291,7 +312,16 @@ class CompanyController extends Controller
                                 $comp->city_id = $city;
                                 $comp->kode_pos = $kode_pos;
                                 $comp->active = 'pending';
-                              
+                                $duration = $fPrice->duration;
+                                if($duration == 'week'){
+                                    $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                }else if($duration == 'monthly'){
+                                    $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
+                                }else if($duration == 'daily'){
+                                    $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+1 Days'));
+                                }else if($duration == 'yearly'){
+                                    $comp->expiry_on = date('Y-m-d H:i:s',strtotime('+365 Days'));
+                                }
                                 $comp->referal = null;
                                 $comp->save();
     
@@ -351,16 +381,7 @@ class CompanyController extends Controller
         if($row){
             $payment = Company_payment::where('company_id',$row->id)->where('status','pending')->first();
             if($payment){
-                $fPrice = $row->price->duration;
-                if($fPrice == 'week'){
-                  $row->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
-              }else if($fPrice == 'monthly'){
-                  $row->expiry_on = date('Y-m-d H:i:s',strtotime('+7 Days'));
-              }else if($fPrice == 'daily'){
-                  $row->expiry_on = date('Y-m-d H:i:s',strtotime('+1 Days'));
-              }else if($fPrice == 'yearly'){
-                  $row->expiry_on = date('Y-m-d H:i:s',strtotime('+365 Days'));
-              }
+           
               $row->active = 'active';
               $row->update();
   

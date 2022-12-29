@@ -49,7 +49,7 @@ class Company extends Model
     }
 
     public function payment(){
-        return $this->belongsTo(Company_payment::class);
+        return $this->hasMany(Company_payment::class);
     }
 
     public function referal(){

@@ -15,7 +15,7 @@ class CompanyResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'=>$this->id,
+            
             'fitur'=>$this->fitur->name,
             'fitur_slug'=>$this->fitur->slug,
             'price'=>$this->price->name,
@@ -36,6 +36,11 @@ class CompanyResource extends JsonResource
             'expiry_on'=>$this->expiry_on,
             'phone'=>$this->phone,
             'email'=>$this->email,
+            'payment'=>$this->payment,
+            'referal'=>$this->referal,
+            'feature'=>$this->fitur,
+            'duration'=>$this->price,
+        
             
            
             
