@@ -47,6 +47,7 @@ class UserController extends Controller
             return response()->json(['message'=>'User not found','status'=>'error','statusCode'=>404]);
         }
     }
+   
     public function update(Request $request,$email){
         $user = User::where('email',$email)->first();
         if($user){  
@@ -57,16 +58,23 @@ class UserController extends Controller
                 'email'=> 'required|max:255|min:10|unique:users,email,'.$user->id.',id|email',
               
                 'level'=>'required|in:admin,user',
+                'phone'=>'required|max:25',
+                'nickname'=>'required|max:255|min:3',
                
             ],[
-                'name.required'=>'Resource is required',
-                'name.max'=>'Resource maximal 255 character',
-                'name.min'=>'Resource minimal 3 character',
+                'name.required'=>'Name is required',
+                'name.max'=>'Name maximal 255 character',
+                'name.min'=>'Name minimal 3 character',
                 'email.required'=>'Email is required',
                 'email.email'=>'Email not valid',
                 'email.unique'=>'Email has been used',
                 'level.required'=>'Level is required',
                 'level.in'=>'Level not match',
+                'phone.required'=>'Phone is required',
+                'phone.max'=>'Phone maximal 25 characters',
+                'nickname.required'=>'Nickname is required',
+                'nickname.min'=>'Nickname min 3 characters',
+                'nickname.max'=>'Nickname max 255 characters',
               
               
                 
@@ -84,7 +92,8 @@ class UserController extends Controller
 
                 }
                 $user->level = $request->level;
-              
+                $user->nickname = $request->nickname;
+                $user->phone = $request->phone;
                 $user->update();
                 return response()->json(['message'=>'Success updated users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);
             }
@@ -102,6 +111,9 @@ class UserController extends Controller
             'email'=>'required|unique:users,email|email',
             'password'=>'required|min:6',
             'level'=>'required|in:admin,user',
+            'phone'=>'required|max:25',
+            'nickname'=>'required|max:255|min:3',
+            
            
         ],[
             'name.required'=>'Name is required',
@@ -114,6 +126,12 @@ class UserController extends Controller
             'level.in'=>'Level not match',
             'password.required'=>'Password is required',
             'password.min'=>'Password min 6 character',
+            'phone.required'=>'Phone is required',
+            'phone.max'=>'Phone maximal 25 characters',
+            'nickname.required'=>'Nickname is required',
+            'nickname.min'=>'Nickname min 3 characters',
+            'nickname.max'=>'Nickname max 255 characters',
+
           
             
         ]);
@@ -127,6 +145,8 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->level = $request->level;
+            $user->nickname = $request->nickname;
+            $user->phone = $request->phone;
             $user->company_id = null;
             $user->save();
             return response()->json(['message'=>'Success created users','user'=>new UserResource($user),'status'=>'ok','statusCode'=>200]);

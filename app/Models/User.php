@@ -22,6 +22,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'level',
+        'phone',
+        'nickname',
+        'photo',
         'company_id',
     ];
 
@@ -43,4 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public function company(){
+        return $this->belongsTo(Company::class);
+    }
 }

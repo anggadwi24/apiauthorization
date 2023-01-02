@@ -15,7 +15,9 @@ use App\Models\Company_payment;
 use App\Http\Controllers\Controller;
 use Image;
 use App\Http\Resources\CompanyResource;
+use App\Http\Resources\UserResource;
 use App\Models\Company_referal;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
@@ -25,7 +27,134 @@ class CompanyController extends Controller
         $collection = CompanyResource::collection($company)->response()->getData(true);
         return response()->json(['message'=>'success','data'=>$collection,'statusCode'=>200,'status'=>'success']);
     }
+    public function editUser($slug,$email){
+        $row = Company::where('slug',$slug)->first();
+        if($row){
+            $user = User::where('company_id',$row->id)->where('email',$email)->first();
+            if($user){
+                $collection =new UserResource($user);
+                return response()->json(['message'=>'User found','user'=>$collection,'statusCode'=>200,'status'=>'ok']);
+                
+            }else{
+                return response()->json(['message'=>'User not found','statusCode'=>404,'status'=>'error']);
 
+            }
+        }else{
+            return response()->json(['message'=>'Feature not found','statusCode'=>404,'status'=>'error']);
+        }
+    }
+    public function updateUser(Request $request,$slug,$email){
+        $row = Company::where('slug',$slug)->first();
+        if($row){
+            $user = User::where('company_id',$row->id)->where('email',$email)->first();
+            if($user){
+                $validator = Validator::make($request->all(), [
+       
+           
+                    'name'=> 'required|max:255|min:3',
+                    'email'=> 'required|max:255|min:10|unique:users,email,'.$user->id.',id|email',
+                  
+                    'level'=>'required|in:cashier,owner',
+                    'phone'=>'required|max:25',
+                    'nickname'=>'required|max:255|min:3',
+                   
+                ],[
+                    'name.required'=>'Name is required',
+                    'name.max'=>'Name maximal 255 character',
+                    'name.min'=>'Name minimal 3 character',
+                    'email.required'=>'Email is required',
+                    'email.email'=>'Email not valid',
+                    'email.unique'=>'Email has been used',
+                    'level.required'=>'Level is required',
+                    'level.in'=>'Level not match',
+                    'phone.required'=>'Phone is required',
+                    'phone.max'=>'Phone maximal 25 characters',
+                    'nickname.required'=>'Nickname is required',
+                    'nickname.min'=>'Nickname min 3 characters',
+                    'nickname.max'=>'Nickname max 255 characters',
+                  
+                  
+                    
+                ]);
+                if($validator->fails()){
+                    $message = $validator->errors();
+                  
+                    return response()->json(['message'=>$message,'status'=>'error','statusCode'=>422]);
+                }else{
+                    $password = $request->password;
+                    $user->name = $request->name;
+                    $user->email = $request->email;
+                    if(!empty($password)){
+                        $user->password = bcrypt($request->password);
+    
+                    }
+                    $user->level = $request->level;
+                    $user->nickname = $request->nickname;
+                    $user->phone = $request->phone;
+                    $user->update();
+                    return response()->json(['message'=>'Success updated users','status'=>'ok','statusCode'=>200]);
+                }
+                
+            }else{
+                return response()->json(['message'=>'User not found','statusCode'=>404,'status'=>'error']);
+
+            }
+        }else{
+            return response()->json(['message'=>'Feature not found','statusCode'=>404,'status'=>'error']);
+        }
+    }
+    public function addUser(Request $request,$slug){
+        $row = Company::where('slug',$slug)->first();
+        if($row){
+            $validator = Validator::make($request->all(), [
+       
+                'name'=> 'required|max:255|min:3',
+                'email'=>'required|unique:users,email|email',
+                'password'=>'required|min:6',
+                'level'=>'required|in:cashier,owner',
+                'phone'=>'required|max:25',
+                'nickname'=>'required|max:255|min:3',
+                
+               
+            ],[
+                'name.required'=>'Name is required',
+                'name.max'=>'Name maximal 255 character',
+                'name.min'=>'Name minimal 3 character',
+                'email.required'=>'Email is required',
+                'email.email'=>'Email not valid',
+                'email.unique'=>'Email has been used',
+                'level.required'=>'Level is required',
+                'level.in'=>'Level not match',
+                'password.required'=>'Password is required',
+                'password.min'=>'Password min 6 character',
+                'phone.required'=>'Phone is required',
+                'phone.max:25'=>'Phone maximal 25 characters',
+                'nickname.required'=>'Nickname is required',
+                'nickname.min'=>'Nickname min 3 characters',
+                'nickname.max'=>'Nickname max 255 characters',
+              
+                
+            ]);
+            if($validator->fails()){
+                $message = $validator->errors();
+              
+                return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
+            }else{
+                $user = new User();
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->password = bcrypt($request->password);
+                $user->level = $request->level;
+                $user->nickname = $request->nickname;
+                $user->phone = $request->phone;
+                $user->company_id = $row->id;
+                $user->save();
+                return response()->json(['message'=>'Success created users','status'=>'ok','statusCode'=>200]);
+            }
+        }else{
+            return response()->json(['status'=>'not found','statusCode'=>404,'message'=>'Company not found']);
+        }
+    }
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
        
@@ -365,6 +494,124 @@ class CompanyController extends Controller
 
               
             }
+        }
+    }
+    public function update(Request $request,$slug){
+        $row = Company::where('slug',$slug)->first();
+        if($row){
+            $validator = Validator::make($request->all(), [
+       
+           
+              
+                'name'=>'required|max:255',
+                'category'=>'required',
+                'province'=>'required',
+                'city'=>'required',
+                'address'=>'required',
+                'kode_pos'=>'required',
+                'phone'=>'required',
+                'email'=>'email|required|unique:company,email,'.$row->id.',id',
+             
+                
+               
+            ],[
+               
+                'name.required'=>'Name of company is required',
+                'name.max'=>'Name of company is maximal 255 character',
+                'province.required'=>'Province is required',
+                'city.required'=>'City is required',
+                'address.required'=>'Address is required',
+                'kode_pos.required'=>'Post code is required',
+                'phone.required'=>'Phone is required',
+                'email.email'=>'Email not valid',
+                'email.required'=>'Email is required',
+                'email.unique'=>'Email has been used',
+                'category.required'=>'Category is required',
+               
+              
+                
+            ]);
+            if($validator->fails()){
+                $message = $validator->errors();
+              
+                return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
+            }else{
+                $file = $request->file('icon');
+                $name = $request->name;
+                $province = $request->province;
+                $city = $request->city;
+                $address = $request->address;
+                $kode_pos = $request->kode_pos;
+                $phone = $request->phone;
+                $email = $request->email;
+                $category = $request->category;
+                $city_sel = City::where('province_id',$province)->where('id',$city)->first();
+                if($city_sel){
+                    $cat = Category::where('name',$category)->first();
+                    if($cat){
+                        $cat_id = $cat->id;
+                    }else{
+                        $cats = new Category();
+                        $cats->name = $category;
+                        $cats->save();
+                        $cat_id = $cats->id;
+                    }
+                    if($request->hasfile('icon')){
+                        $validator = Validator::make($request->all(), [
+    
+                            'icon' => 'required|mimes:jpeg,png,jpg|max:5048',
+                        
+                        ],[
+                            
+                            'icon.required'=>'Icon is required',
+                            'icon.mimes'=>'Icon can format jpeg,png,jpg',
+                            'icon.max'=>'Icon maximal 5mb',
+                        
+                        ]);
+                        if($validator->fails()){
+                            $message = $validator->errors();
+                            return response()->json(['message'=>$message,'status'=>'validations','statusCode'=>422]);
+                        }else{
+                            $filenames = $row->slug. '.' . $file->getClientOriginalExtension();
+            
+                            $image =  Image::make($file->getRealPath());
+                            $image->resize(500, null, function ($constraint) {
+                            $constraint->aspectRatio();
+                            });  
+                            $image->save( public_path('/uploads/company/' . $filenames , 20) );
+                            $row->name = $name;
+                            $row->phone = $phone;
+                            $row->email = $email;
+                            $row->category_id = $cat_id;
+                            $row->province = $province;
+                            $row->city = $city;
+                            $row->kode_pos = $kode_pos;
+                            $row->address = $address;
+                            $row->icon = $filenames;
+                            $row->update();
+                            return response()->json(['message'=>$row->name.' successfully updated','status'=>'success','statusCode'=>200,'slug'=>$row->slug]);
+                        }
+                    }else{
+                        $row->name = $name;
+                        $row->phone = $phone;
+                        $row->email = $email;
+                        $row->category_id = $cat_id;
+                        $row->province = $province;
+                        $row->city = $city;
+                        $row->kode_pos = $kode_pos;
+                        $row->address = $address;
+                        $row->update();
+                        return response()->json(['message'=>$row->name.' successfully updated','status'=>'success','statusCode'=>200,'slug'=>$row->slug]);
+                    }
+                
+                }else{
+                    return response()->json(['message'=>'City or Province not found','status'=>'notfound','statusCode'=>404]);
+
+                }
+            }
+            
+        }else{
+            return response()->json(['message'=>'Company not found','status'=>'notfound','statusCode'=>404]);
         }
     }
     public function detail($slug){

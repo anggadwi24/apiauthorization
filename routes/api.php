@@ -6,6 +6,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\EmailVerificationController;
 use App\Http\Controllers\API\FiturController;
+use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResourceController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
@@ -35,6 +36,13 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
     Route::get('verify-email/{id}/{hash}',[EmailVerificationController::class,'verify'])->name('verification.verify');
 
     Route::middleware(['auth','VerifyEmail'])->group(function () {
+        Route::get('/profile',[ProfileController::class,'index']);
+        Route::post('/profile/edit',[ProfileController::class,'edit']);
+        Route::post('/profile/password',[ProfileController::class,'password']);
+        Route::post('/profile/image',[ProfileController::class,'image']);
+
+
+
        
         Route::get('/category',[CategoryController::class,'index']);
         Route::get('/category/search',[CategoryController::class,'search']);
@@ -58,7 +66,14 @@ Route::group(['middleware' => 'auth:sanctum'],function(){
         Route::get('/company',[CompanyController::class,'index']);
         Route::post('/company/add',[CompanyController::class,'store']);
         Route::get('/company/detail/{slug}',[CompanyController::class,'detail']);
+        Route::post('/company/edit/{slug}',[CompanyController::class,'update']);
         Route::post('/company/payment/{slug}',[CompanyController::class,'payment']);
+        Route::post('/company/{slug}/user/add',[CompanyController::class,'addUser']);
+        Route::get('/company/{slug}/user/edit/{email}',[CompanyController::class,'editUser']);
+        Route::post('/company/{slug}/user/edit/{email}',[CompanyController::class,'updateUser']);
+
+
+
 
 
 
