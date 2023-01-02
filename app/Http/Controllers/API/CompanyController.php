@@ -92,6 +92,7 @@ class CompanyController extends Controller
                     $user->nickname = $request->nickname;
                     $user->phone = $request->phone;
                     $user->update();
+                    LogActivity::addToLog('UPDATE USER COMPANY');
                     return response()->json(['message'=>'Success updated users','status'=>'ok','statusCode'=>200]);
                 }
                 
@@ -149,6 +150,8 @@ class CompanyController extends Controller
                 $user->phone = $request->phone;
                 $user->company_id = $row->id;
                 $user->save();
+                LogActivity::addToLog('INSERT USER COMPANY');
+
                 return response()->json(['message'=>'Success created users','status'=>'ok','statusCode'=>200]);
             }
         }else{
@@ -583,12 +586,13 @@ class CompanyController extends Controller
                             $row->phone = $phone;
                             $row->email = $email;
                             $row->category_id = $cat_id;
-                            $row->province = $province;
-                            $row->city = $city;
+                            $row->province_id = $province;
+                            $row->city_id = $city;
                             $row->kode_pos = $kode_pos;
                             $row->address = $address;
                             $row->icon = $filenames;
                             $row->update();
+                            LogActivity::addToLog('EDIT COMPANY');
                             return response()->json(['message'=>$row->name.' successfully updated','status'=>'success','statusCode'=>200,'slug'=>$row->slug]);
                         }
                     }else{
@@ -596,11 +600,12 @@ class CompanyController extends Controller
                         $row->phone = $phone;
                         $row->email = $email;
                         $row->category_id = $cat_id;
-                        $row->province = $province;
-                        $row->city = $city;
+                        $row->province_id = $province;
+                        $row->city_id = $city;
                         $row->kode_pos = $kode_pos;
                         $row->address = $address;
                         $row->update();
+                        LogActivity::addToLog('EDIT COMPANY');
                         return response()->json(['message'=>$row->name.' successfully updated','status'=>'success','statusCode'=>200,'slug'=>$row->slug]);
                     }
                 

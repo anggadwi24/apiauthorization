@@ -40,6 +40,7 @@ class CompanyResource extends JsonResource
             'referal'=>$this->referal,
             'feature'=>$this->fitur,
             'duration'=>$this->price,
+            'created_at'=>$this->created_at,
             'users'=>UserResource::collection($this->user),
         
             
