@@ -36,7 +36,7 @@ class CompanyResource extends JsonResource
             'expiry_on'=>$this->expiry_on,
             'phone'=>$this->phone,
             'email'=>$this->email,
-            'payment'=>$this->payment,
+            'payment'=>PaymentResource::collection($this->payment),
             'referal'=>$this->referal,
             'feature'=>$this->fitur,
             'duration'=>$this->price,

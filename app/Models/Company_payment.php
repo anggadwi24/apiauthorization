@@ -44,6 +44,6 @@ class Company_payment extends Model
         return $this->belongsTo(Fitur::class);
     }
     public function price(){
-        return $this->belongsTo(Fitur_price::class);
+        return $this->belongsTo(Fitur_price::class,'fitur_price_id');
     }
 }
