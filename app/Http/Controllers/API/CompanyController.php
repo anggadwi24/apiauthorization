@@ -15,6 +15,7 @@ use App\Models\Company_payment;
 use App\Http\Controllers\Controller;
 use Image;
 use App\Http\Resources\CompanyResource;
+use App\Http\Resources\UserCompanyResource;
 use App\Http\Resources\UserResource;
 use App\Models\Company_referal;
 use App\Models\User;
